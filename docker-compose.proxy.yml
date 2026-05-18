@@ -1,0 +1,17 @@
+services:
+  edge_proxy:
+    image: nginx:1.27-alpine
+    container_name: traffic_edge_proxy
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - nginx_tile_cache:/var/cache/nginx/tiles
+      - nginx_bbox_cache:/var/cache/nginx/bbox
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+
+volumes:
+  nginx_tile_cache:
+  nginx_bbox_cache:

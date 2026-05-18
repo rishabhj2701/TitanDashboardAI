@@ -1,0 +1,102 @@
+[
+  {
+    "id": "iot_001",
+    "question": "How many sensor readings total?",
+    "domain": "iot",
+    "expected_analysis_type": "summary",
+    "expected_key_columns": ["count"],
+    "expected_narrative_patterns": ["\\d+"],
+    "expected_no_crash_bleed": true,
+    "assertions": { "response_not_empty": true, "no_error": true, "contains_number": true, "no_crash_language": true }
+  },
+  {
+    "id": "iot_002",
+    "question": "What is the average temperature?",
+    "domain": "iot",
+    "expected_analysis_type": "summary",
+    "expected_key_columns": ["temperature"],
+    "expected_narrative_patterns": ["\\d+"],
+    "expected_no_crash_bleed": true,
+    "assertions": { "response_not_empty": true, "no_error": true, "contains_number": true, "no_crash_language": true }
+  },
+  {
+    "id": "iot_003",
+    "question": "Show the temperature trend over time",
+    "domain": "iot",
+    "expected_analysis_type": "trend",
+    "expected_key_columns": ["timestamp", "temperature"],
+    "expected_narrative_patterns": ["[Tt]rend|increas|decreas|temperatur"],
+    "expected_no_crash_bleed": true,
+    "assertions": { "response_not_empty": true, "no_error": true, "no_crash_language": true }
+  },
+  {
+    "id": "iot_004",
+    "question": "Distribution of readings by location",
+    "domain": "iot",
+    "expected_analysis_type": "distribution",
+    "expected_key_columns": ["location_name", "count"],
+    "expected_narrative_patterns": ["[Tt]op|location|distribut"],
+    "expected_no_crash_bleed": true,
+    "assertions": { "response_not_empty": true, "no_error": true, "no_crash_language": true }
+  },
+  {
+    "id": "iot_005",
+    "question": "Compare average humidity by sensor",
+    "domain": "iot",
+    "expected_analysis_type": "comparison",
+    "expected_key_columns": ["sensor_id", "humidity"],
+    "expected_narrative_patterns": ["\\d+"],
+    "expected_no_crash_bleed": true,
+    "assertions": { "response_not_empty": true, "no_error": true, "contains_number": true, "no_crash_language": true }
+  },
+  {
+    "id": "iot_006",
+    "question": "Show all sensor readings on the map",
+    "domain": "iot",
+    "expected_analysis_type": "map_only",
+    "expected_key_columns": [],
+    "expected_narrative_patterns": ["map|display"],
+    "expected_no_crash_bleed": true,
+    "assertions": { "response_not_empty": true, "no_error": true, "no_crash_language": true }
+  },
+  {
+    "id": "iot_007",
+    "question": "List the 10 highest temperature readings",
+    "domain": "iot",
+    "expected_analysis_type": "raw_table",
+    "expected_key_columns": ["temperature"],
+    "expected_narrative_patterns": ["\\d+"],
+    "expected_no_crash_bleed": true,
+    "assertions": { "response_not_empty": true, "no_error": true, "no_crash_language": true }
+  },
+  {
+    "id": "iot_008",
+    "question": "What is the max pressure recorded?",
+    "domain": "iot",
+    "expected_analysis_type": "summary",
+    "expected_key_columns": ["pressure"],
+    "expected_narrative_patterns": ["\\d+"],
+    "expected_no_crash_bleed": true,
+    "assertions": { "response_not_empty": true, "no_error": true, "contains_number": true, "no_crash_language": true }
+  },
+  {
+    "id": "iot_009",
+    "question": "Summarize the sensor data",
+    "domain": "iot",
+    "expected_analysis_type": "summary",
+    "expected_key_columns": [],
+    "expected_narrative_patterns": ["\\d+"],
+    "expected_no_crash_bleed": true,
+    "assertions": { "response_not_empty": true, "no_error": true, "no_crash_language": true }
+  },
+  {
+    "id": "iot_010",
+    "question": "How does temperature vary by location?",
+    "domain": "iot",
+    "expected_analysis_type": "distribution",
+    "expected_key_columns": ["location_name", "temperature"],
+    "expected_narrative_patterns": ["[Tt]op|location|temperatur"],
+    "expected_no_crash_bleed": true,
+    "assertions": { "response_not_empty": true, "no_error": true, "no_crash_language": true }
+  }
+]

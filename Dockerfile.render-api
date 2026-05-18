@@ -1,0 +1,31 @@
+FROM python:3.11-slim
+
+ENV PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    APP_ENV=development \
+    REQUIRE_USER_ID=0 \
+    APP_API_WORKERS=1 \
+    TILE_API_WORKERS=1
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    curl \
+    nginx \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.docker.txt /tmp/requirements.docker.txt
+RUN pip install --upgrade pip && pip install -r /tmp/requirements.docker.txt
+
+COPY . /app
+COPY infra/nginx/render-api.conf /etc/nginx/nginx.conf.template
+RUN chmod +x /app/scripts/start-render-api.sh
+
+EXPOSE 10000
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=90s --retries=3 \
+  CMD curl -fsS "http://127.0.0.1:${PORT:-10000}/healthz" >/dev/null || exit 1
+
+CMD ["/app/scripts/start-render-api.sh"]

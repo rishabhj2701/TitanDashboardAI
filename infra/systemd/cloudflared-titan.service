@@ -1,0 +1,15 @@
+[Unit]
+Description=Cloudflare quick tunnel to Titan demo (localhost:8080)
+After=network-online.target titan-demo.service
+Wants=titan-demo.service
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=5
+ExecStart=/usr/local/bin/cloudflared tunnel --url http://127.0.0.1:8080
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

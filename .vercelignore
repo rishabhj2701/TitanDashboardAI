@@ -1,0 +1,13 @@
+.venv
+node_modules
+TitanDashboardAI
+uploads
+*.pbf
+*.csv
+*.dump
+dist
+.git
+.pytest_cache
+graphs
+iowa-260516.osm.pbf
+missouri-260205.osm.pbf

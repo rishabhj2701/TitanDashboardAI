@@ -1,0 +1,207 @@
+[
+  {
+    "id": "smoke_traffic_i70_only",
+    "tier": "smoke",
+    "complexity": "simple",
+    "domain": "traffic",
+    "turns": [
+      {
+        "user": "Show just I-70 traffic data",
+        "assertions": {
+          "response_not_empty": true,
+          "no_error": true,
+          "has_map": true,
+          "no_timeout_text": true
+        },
+        "expected_patterns": ["i[- ]?70|traffic|road|map"],
+        "forbidden_patterns": ["statement timeout|Error executing agent|Traceback"]
+      }
+    ],
+    "final_assertions": {
+      "has_map": true
+    }
+  },
+  {
+    "id": "smoke_traffic_i44_only",
+    "tier": "smoke",
+    "complexity": "simple",
+    "domain": "traffic",
+    "turns": [
+      {
+        "user": "Show just I-44 traffic data",
+        "assertions": {
+          "response_not_empty": true,
+          "no_error": true,
+          "has_map": true,
+          "no_timeout_text": true
+        },
+        "expected_patterns": ["i[- ]?44|traffic|road|map"],
+        "forbidden_patterns": ["statement timeout|Error executing agent|Traceback"]
+      }
+    ],
+    "final_assertions": {
+      "has_map": true
+    }
+  },
+  {
+    "id": "smoke_chain_i70_then_traffic",
+    "tier": "smoke",
+    "complexity": "in_depth",
+    "domain": "traffic",
+    "turns": [
+      {
+        "user": "Show just I-70 data",
+        "assertions": {
+          "response_not_empty": true,
+          "no_error": true,
+          "no_timeout_text": true
+        },
+        "expected_patterns": ["i[- ]?70|traffic|road|clarify"],
+        "forbidden_patterns": ["statement timeout|Error executing agent|Traceback"]
+      },
+      {
+        "user": "traffic",
+        "assertions": {
+          "response_not_empty": true,
+          "no_error": true,
+          "has_map": true,
+          "no_timeout_text": true
+        },
+        "expected_patterns": ["traffic|map|road"],
+        "forbidden_patterns": ["statement timeout|Error executing agent|Traceback"]
+      }
+    ],
+    "final_assertions": {
+      "has_map": true
+    }
+  },
+  {
+    "id": "smoke_chain_i70_to_i44",
+    "tier": "smoke",
+    "complexity": "in_depth",
+    "domain": "traffic",
+    "turns": [
+      {
+        "user": "Show I-70",
+        "assertions": {
+          "response_not_empty": true,
+          "no_error": true,
+          "no_timeout_text": true
+        },
+        "expected_patterns": ["i[- ]?70|traffic|road|clarify"],
+        "forbidden_patterns": ["statement timeout|Error executing agent|Traceback"]
+      },
+      {
+        "user": "traffic",
+        "assertions": {
+          "response_not_empty": true,
+          "no_error": true,
+          "has_map": true,
+          "no_timeout_text": true
+        },
+        "expected_patterns": ["traffic|map|road"],
+        "forbidden_patterns": ["statement timeout|Error executing agent|Traceback"]
+      },
+      {
+        "user": "Now show I-44",
+        "assertions": {
+          "response_not_empty": true,
+          "no_error": true,
+          "has_map": true,
+          "no_timeout_text": true
+        },
+        "expected_patterns": ["i[- ]?44|traffic|map|road"],
+        "forbidden_patterns": ["statement timeout|Error executing agent|Traceback"]
+      }
+    ],
+    "final_assertions": {
+      "has_map": true
+    }
+  },
+  {
+    "id": "smoke_crash_i70",
+    "tier": "smoke",
+    "complexity": "simple",
+    "domain": "crash",
+    "turns": [
+      {
+        "user": "Show crashes on I-70",
+        "assertions": {
+          "response_not_empty": true,
+          "no_error": true,
+          "has_map": true,
+          "no_timeout_text": true
+        },
+        "expected_patterns": ["crash|i[- ]?70|map"],
+        "forbidden_patterns": ["statement timeout|Error executing agent|Traceback"]
+      }
+    ],
+    "final_assertions": {
+      "has_map": true
+    }
+  },
+  {
+    "id": "smoke_workzone_i44",
+    "tier": "smoke",
+    "complexity": "simple",
+    "domain": "workzone",
+    "turns": [
+      {
+        "user": "Show workzones on I-44",
+        "assertions": {
+          "response_not_empty": true,
+          "no_error": true,
+          "has_map": true,
+          "no_timeout_text": true
+        },
+        "expected_patterns": ["workzone|i[- ]?44|map"],
+        "forbidden_patterns": ["statement timeout|Error executing agent|Traceback"]
+      }
+    ],
+    "final_assertions": {
+      "has_map": true
+    }
+  },
+  {
+    "id": "smoke_compare_crash_i70_i44",
+    "tier": "smoke",
+    "complexity": "simple",
+    "domain": "crash",
+    "turns": [
+      {
+        "user": "Compare crash counts on I-70 vs I-44",
+        "assertions": {
+          "response_not_empty": true,
+          "no_error": true,
+          "contains_number": true,
+          "no_timeout_text": true
+        },
+        "expected_patterns": ["compare|crash|i[- ]?70|i[- ]?44|count"],
+        "forbidden_patterns": ["statement timeout|Error executing agent|Traceback"]
+      }
+    ],
+    "final_assertions": {}
+  },
+  {
+    "id": "smoke_traffic_active_run_i70",
+    "tier": "smoke",
+    "complexity": "simple",
+    "domain": "traffic",
+    "turns": [
+      {
+        "user": "Show active traffic data on I-70",
+        "assertions": {
+          "response_not_empty": true,
+          "no_error": true,
+          "has_map": true,
+          "no_timeout_text": true
+        },
+        "expected_patterns": ["active|traffic|i[- ]?70|map|road"],
+        "forbidden_patterns": ["statement timeout|Error executing agent|Traceback"]
+      }
+    ],
+    "final_assertions": {
+      "has_map": true
+    }
+  }
+]

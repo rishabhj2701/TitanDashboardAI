@@ -1,0 +1,48 @@
+# Oracle Cloud VM overlay — use with local PostGIS profile:
+#   docker compose --profile localdb -f docker-compose.yml -f docker-compose.oracle.yml up -d --build
+#
+# PostGIS stays on the private Docker network (no public 5432). Only port 8080 is
+# used locally for Cloudflare Tunnel.
+
+services:
+  postgis:
+    ports:
+      - "127.0.0.1:5432:5432"
+
+  app_api:
+    depends_on:
+      postgis:
+        condition: service_healthy
+        required: false
+      redis:
+        condition: service_healthy
+    environment:
+      APP_ENV: production
+      APP_API_WORKERS: ${APP_API_WORKERS:-2}
+      OAUTH_REDIRECT_BASE: ${OAUTH_REDIRECT_BASE:-http://localhost:8080}
+      AGENT_SKILLS_ENABLED: ${AGENT_SKILLS_ENABLED:-1}
+      DEFAULT_CV_DATASET: ${DEFAULT_CV_DATASET:-iowa_cv_winter_2025}
+
+  tile_api:
+    depends_on:
+      postgis:
+        condition: service_healthy
+        required: false
+    environment:
+      DEFAULT_CV_DATASET: ${DEFAULT_CV_DATASET:-iowa_cv_winter_2025}
+      TILE_API_WORKERS: ${TILE_API_WORKERS:-1}
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+      args:
+        VITE_MAPBOX_TOKEN: ${VITE_MAPBOX_TOKEN:-}
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-}
+        VITE_TILE_API_BASE_URL: ${VITE_TILE_API_BASE_URL:-}
+        VITE_USE_ROAD_TILES: ${VITE_USE_ROAD_TILES:-1}
+        VITE_ROAD_TILES_DATASET: ${VITE_ROAD_TILES_DATASET:-iowa_cv_winter_2025}
+        VITE_ENABLE_WEBSITE_BUILDER_ROUTES: ${VITE_ENABLE_WEBSITE_BUILDER_ROUTES:-0}
+        VITE_ENABLE_CHART_EDITING: ${VITE_ENABLE_CHART_EDITING:-0}
+    ports:
+      - "127.0.0.1:8080:80"

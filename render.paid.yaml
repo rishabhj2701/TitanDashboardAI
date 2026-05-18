@@ -1,0 +1,70 @@
+# Paid Render stack (always-on API, 20 GB Postgres, Redis). See render.yaml for free tier.
+
+services:
+  - type: web
+    name: titan-web
+    runtime: static
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_MAPBOX_TOKEN
+        sync: false
+      - key: VITE_API_BASE_URL
+        value: https://titan-api.onrender.com
+      - key: VITE_TILE_API_BASE_URL
+        value: https://titan-api.onrender.com
+      - key: VITE_USE_ROAD_TILES
+        value: "1"
+      - key: VITE_ROAD_TILES_DATASET
+        value: iowa_cv_winter_2025
+
+  - type: web
+    name: titan-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile.render-api
+    plan: starter
+    region: ohio
+    healthCheckPath: /healthz
+    envVars:
+      - key: POSTGIS_DSN
+        fromDatabase:
+          name: titan-postgis
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: titan-kv
+          property: connectionString
+      - key: APP_ENV
+        value: development
+      - key: REQUIRE_USER_ID
+        value: "0"
+      - key: CORS_ALLOW_ORIGINS
+        value: https://titan-web.onrender.com
+      - key: GOOGLE_API_KEY
+        sync: false
+      - key: AGENT_SKILLS_ENABLED
+        value: "1"
+      - key: DEFAULT_CV_DATASET
+        value: iowa_cv_winter_2025
+      - key: RUN_DB_INIT
+        value: "1"
+
+  - type: keyvalue
+    name: titan-kv
+    plan: starter
+    maxmemoryPolicy: allkeys-lru
+    ipAllowList: []
+
+databases:
+  - name: titan-postgis
+    databaseName: traffic
+    user: titan
+    plan: basic-1gb
+    diskSizeGB: 20
+    postgresMajorVersion: "16"
+    ipAllowList: []

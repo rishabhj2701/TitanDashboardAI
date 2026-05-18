@@ -1,0 +1,58 @@
+# All-in-one demo image: Vite frontend + nginx + app API + tile API
+FROM node:20-alpine AS frontend-build
+
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+
+ARG VITE_MAPBOX_TOKEN=
+ARG VITE_API_BASE_URL=
+ARG VITE_TILE_API_BASE_URL=
+ARG VITE_USE_ROAD_TILES=1
+ARG VITE_ROAD_TILES_DATASET=iowa_cv_winter_2025
+ARG VITE_ENABLE_WEBSITE_BUILDER_ROUTES=0
+ARG VITE_ENABLE_CHART_EDITING=0
+
+ENV VITE_MAPBOX_TOKEN=$VITE_MAPBOX_TOKEN \
+    VITE_API_BASE_URL=$VITE_API_BASE_URL \
+    VITE_TILE_API_BASE_URL=$VITE_TILE_API_BASE_URL \
+    VITE_USE_ROAD_TILES=$VITE_USE_ROAD_TILES \
+    VITE_ROAD_TILES_DATASET=$VITE_ROAD_TILES_DATASET \
+    VITE_ENABLE_WEBSITE_BUILDER_ROUTES=$VITE_ENABLE_WEBSITE_BUILDER_ROUTES \
+    VITE_ENABLE_CHART_EDITING=$VITE_ENABLE_CHART_EDITING
+
+RUN npm run build
+
+FROM python:3.11-slim
+
+ENV PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    APP_ENV=development \
+    REQUIRE_USER_ID=0 \
+    APP_API_WORKERS=1 \
+    TILE_API_WORKERS=1
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    curl \
+    nginx \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.docker.txt /tmp/requirements.docker.txt
+RUN pip install --upgrade pip && pip install -r /tmp/requirements.docker.txt
+
+COPY . /app
+COPY --from=frontend-build /app/dist /usr/share/nginx/html
+COPY infra/nginx/demo.conf /etc/nginx/nginx.conf
+RUN chmod +x /app/scripts/start-demo.sh
+
+EXPOSE 80
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
+  CMD curl -fsS http://127.0.0.1/healthz >/dev/null || exit 1
+
+CMD ["/app/scripts/start-demo.sh"]

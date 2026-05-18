@@ -1,0 +1,106 @@
+[
+  {
+    "id": "sales_001",
+    "question": "How many sales records total?",
+    "domain": "sales",
+    "expected_analysis_type": "summary",
+    "expected_key_columns": ["count"],
+    "expected_narrative_patterns": ["\\d+"],
+    "expected_no_crash_bleed": true,
+    "assertions": { "response_not_empty": true, "no_error": true, "contains_number": true, "no_crash_language": true },
+    "style_checks": { "no_tool_talk": true, "max_words": 150 }
+  },
+  {
+    "id": "sales_002",
+    "question": "What is the distribution of sales by category?",
+    "domain": "sales",
+    "expected_analysis_type": "distribution",
+    "expected_key_columns": ["category", "count"],
+    "expected_narrative_patterns": ["[Tt]op|distribut|categor"],
+    "expected_no_crash_bleed": true,
+    "assertions": { "response_not_empty": true, "no_error": true, "contains_number": true, "no_crash_language": true },
+    "style_checks": { "no_tool_talk": true, "max_words": 250 }
+  },
+  {
+    "id": "sales_003",
+    "question": "Show the trend of total amount by month",
+    "domain": "sales",
+    "expected_analysis_type": "trend",
+    "expected_key_columns": ["date", "amount"],
+    "expected_narrative_patterns": ["[Tt]rend|month|increas|decreas"],
+    "expected_no_crash_bleed": true,
+    "assertions": { "response_not_empty": true, "no_error": true, "no_crash_language": true }
+  },
+  {
+    "id": "sales_004",
+    "question": "What is the average order amount?",
+    "domain": "sales",
+    "expected_analysis_type": "summary",
+    "expected_key_columns": ["amount"],
+    "expected_narrative_patterns": ["\\d+"],
+    "expected_no_crash_bleed": true,
+    "assertions": { "response_not_empty": true, "no_error": true, "contains_number": true, "no_crash_language": true },
+    "style_checks": { "no_tool_talk": true, "max_words": 150 }
+  },
+  {
+    "id": "sales_005",
+    "question": "Compare total revenue by region",
+    "domain": "sales",
+    "expected_analysis_type": "comparison",
+    "expected_key_columns": ["region", "amount"],
+    "expected_narrative_patterns": ["\\d+"],
+    "expected_no_crash_bleed": true,
+    "assertions": { "response_not_empty": true, "no_error": true, "contains_number": true, "no_crash_language": true }
+  },
+  {
+    "id": "sales_006",
+    "question": "Show the top 5 products by quantity sold",
+    "domain": "sales",
+    "expected_analysis_type": "distribution",
+    "expected_key_columns": ["product", "quantity"],
+    "expected_narrative_patterns": ["[Tt]op|product"],
+    "expected_no_crash_bleed": true,
+    "assertions": { "response_not_empty": true, "no_error": true, "no_crash_language": true }
+  },
+  {
+    "id": "sales_007",
+    "question": "Summarize this dataset",
+    "domain": "sales",
+    "expected_analysis_type": "summary",
+    "expected_key_columns": [],
+    "expected_narrative_patterns": ["\\d+"],
+    "expected_no_crash_bleed": true,
+    "assertions": { "response_not_empty": true, "no_error": true, "no_crash_language": true },
+    "style_checks": { "no_tool_talk": true, "max_words": 200 }
+  },
+  {
+    "id": "sales_008",
+    "question": "Show all records on the map",
+    "domain": "sales",
+    "expected_analysis_type": "map_only",
+    "expected_key_columns": [],
+    "expected_narrative_patterns": ["map|display"],
+    "expected_no_crash_bleed": true,
+    "assertions": { "response_not_empty": true, "no_error": true, "no_crash_language": true }
+  },
+  {
+    "id": "sales_009",
+    "question": "List the 10 largest orders",
+    "domain": "sales",
+    "expected_analysis_type": "raw_table",
+    "expected_key_columns": ["amount"],
+    "expected_narrative_patterns": ["\\d+"],
+    "expected_no_crash_bleed": true,
+    "assertions": { "response_not_empty": true, "no_error": true, "no_crash_language": true }
+  },
+  {
+    "id": "sales_010",
+    "question": "How does revenue break down by product?",
+    "domain": "sales",
+    "expected_analysis_type": "distribution",
+    "expected_key_columns": ["product", "amount"],
+    "expected_narrative_patterns": ["[Tt]op|product|distribut"],
+    "expected_no_crash_bleed": true,
+    "assertions": { "response_not_empty": true, "no_error": true, "contains_number": true, "no_crash_language": true }
+  }
+]

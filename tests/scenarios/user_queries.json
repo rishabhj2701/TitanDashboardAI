@@ -1,0 +1,12 @@
+[
+  {
+    "complexity": "simple",
+    "domain": "traffic",
+    "prompt": "Show just I-70 data"
+  },
+  {
+    "complexity": "in_depth",
+    "domain": "traffic",
+    "prompt": "Show I-70 traffic data for active run then switch to I-44"
+  }
+]

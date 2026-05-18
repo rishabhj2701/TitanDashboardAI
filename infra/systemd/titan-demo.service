@@ -1,0 +1,17 @@
+[Unit]
+Description=Titan Dashboard AI (Docker Compose)
+After=docker.service network-online.target
+Requires=docker.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/opt/titan
+EnvironmentFile=-/opt/titan/.env
+ExecStart=/usr/bin/docker compose --env-file /opt/titan/.env --profile localdb -f docker-compose.yml -f docker-compose.oracle.yml up -d --build
+ExecStop=/usr/bin/docker compose --env-file /opt/titan/.env --profile localdb -f docker-compose.yml -f docker-compose.oracle.yml down
+TimeoutStartSec=7200
+
+[Install]
+WantedBy=multi-user.target

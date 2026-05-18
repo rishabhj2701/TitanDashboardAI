@@ -1,0 +1,76 @@
+{
+  "feed_info": {
+    "publisher": "Missouri Department of Transportation",
+    "version": "4.1",
+    "update_date": "2025-07-15T00:00:00Z",
+    "data_sources": [
+      {"data_source_id": "1", "organization_name": "MoDOT - Sample"}
+    ]
+  },
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "id": "SAMPLE-WZ-001",
+      "type": "Feature",
+      "properties": {
+        "core_details": {
+          "data_source_id": "1",
+          "event_type": "work-zone",
+          "road_names": ["I-44"],
+          "direction": "eastbound",
+          "description": "Pavement resurfacing — sample data"
+        },
+        "start_date": "2025-07-10T05:00:00Z",
+        "end_date": "2025-08-15T23:00:00Z",
+        "vehicle_impact": "some-lanes-closed",
+        "location_method": "channel-device-method"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [[-90.4540, 38.5980], [-90.4380, 38.6045], [-90.4220, 38.6110]]
+      }
+    },
+    {
+      "id": "SAMPLE-WZ-002",
+      "type": "Feature",
+      "properties": {
+        "core_details": {
+          "data_source_id": "1",
+          "event_type": "work-zone",
+          "road_names": ["I-70"],
+          "direction": "westbound",
+          "description": "Bridge deck repair — sample data"
+        },
+        "start_date": "2025-07-01T05:00:00Z",
+        "end_date": "2025-09-30T23:00:00Z",
+        "vehicle_impact": "all-lanes-open-shift-right",
+        "location_method": "channel-device-method"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [[-90.7060, 38.7240], [-90.6720, 38.7195], [-90.6380, 38.7155]]
+      }
+    },
+    {
+      "id": "SAMPLE-WZ-003",
+      "type": "Feature",
+      "properties": {
+        "core_details": {
+          "data_source_id": "1",
+          "event_type": "work-zone",
+          "road_names": ["FOREST PARK PKWY"],
+          "direction": "eastbound",
+          "description": "Lane closure for utility work — sample data"
+        },
+        "start_date": "2025-07-14T08:00:00Z",
+        "end_date": "2025-07-20T18:00:00Z",
+        "vehicle_impact": "some-lanes-closed",
+        "location_method": "channel-device-method"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [[-90.2940, 38.6388], [-90.2880, 38.6395], [-90.2820, 38.6402]]
+      }
+    }
+  ]
+}
