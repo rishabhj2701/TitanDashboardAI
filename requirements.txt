@@ -1,0 +1,5 @@
+-r requirements.docker.txt
+
+# Local development and test dependencies
+pytest
+httpx

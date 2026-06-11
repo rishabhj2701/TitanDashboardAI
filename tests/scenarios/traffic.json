@@ -1,0 +1,102 @@
+[
+  {
+    "id": "traffic_001",
+    "question": "How many traffic records total?",
+    "domain": "traffic",
+    "expected_analysis_type": "summary",
+    "expected_key_columns": ["count"],
+    "expected_narrative_patterns": ["\\d+"],
+    "expected_no_crash_bleed": false,
+    "assertions": { "response_not_empty": true, "no_error": true, "contains_number": true }
+  },
+  {
+    "id": "traffic_002",
+    "question": "What is the average speed?",
+    "domain": "traffic",
+    "expected_analysis_type": "summary",
+    "expected_key_columns": ["speed"],
+    "expected_narrative_patterns": ["\\d+"],
+    "expected_no_crash_bleed": false,
+    "assertions": { "response_not_empty": true, "no_error": true, "contains_number": true }
+  },
+  {
+    "id": "traffic_003",
+    "question": "Show all traffic data on the map",
+    "domain": "traffic",
+    "expected_analysis_type": "map_only",
+    "expected_key_columns": [],
+    "expected_narrative_patterns": ["map|display|traffic"],
+    "expected_no_crash_bleed": false,
+    "assertions": { "response_not_empty": true, "no_error": true, "has_map": true }
+  },
+  {
+    "id": "traffic_004",
+    "question": "Show traffic on I-70",
+    "domain": "traffic",
+    "expected_analysis_type": "map_only",
+    "expected_key_columns": [],
+    "expected_narrative_patterns": ["map|I.?70|display"],
+    "expected_no_crash_bleed": false,
+    "assertions": { "response_not_empty": true, "no_error": true, "has_map": true }
+  },
+  {
+    "id": "traffic_005",
+    "question": "How many hard braking events are there?",
+    "domain": "traffic",
+    "expected_analysis_type": "summary",
+    "expected_key_columns": ["count"],
+    "expected_narrative_patterns": ["\\d+"],
+    "expected_no_crash_bleed": false,
+    "assertions": { "response_not_empty": true, "no_error": true, "contains_number": true }
+  },
+  {
+    "id": "traffic_006",
+    "question": "Distribution of speed by road",
+    "domain": "traffic",
+    "expected_analysis_type": "distribution",
+    "expected_key_columns": ["road", "speed"],
+    "expected_narrative_patterns": ["[Tt]op|road|distribut"],
+    "expected_no_crash_bleed": false,
+    "assertions": { "response_not_empty": true, "no_error": true }
+  },
+  {
+    "id": "traffic_007",
+    "question": "Show speed trend over time",
+    "domain": "traffic",
+    "expected_analysis_type": "trend",
+    "expected_key_columns": ["speed"],
+    "expected_narrative_patterns": ["[Tt]rend|increas|decreas"],
+    "expected_no_crash_bleed": false,
+    "assertions": { "response_not_empty": true, "no_error": true }
+  },
+  {
+    "id": "traffic_008",
+    "question": "Compare average speed on I-70 vs I-44",
+    "domain": "traffic",
+    "expected_analysis_type": "comparison",
+    "expected_key_columns": ["road", "speed"],
+    "expected_narrative_patterns": ["\\d+"],
+    "expected_no_crash_bleed": false,
+    "assertions": { "response_not_empty": true, "no_error": true, "contains_number": true }
+  },
+  {
+    "id": "traffic_009",
+    "question": "List the 10 fastest vehicles",
+    "domain": "traffic",
+    "expected_analysis_type": "raw_table",
+    "expected_key_columns": ["speed"],
+    "expected_narrative_patterns": ["\\d+"],
+    "expected_no_crash_bleed": false,
+    "assertions": { "response_not_empty": true, "no_error": true }
+  },
+  {
+    "id": "traffic_010",
+    "question": "How many vehicles exceeded the speed limit?",
+    "domain": "traffic",
+    "expected_analysis_type": "summary",
+    "expected_key_columns": ["count"],
+    "expected_narrative_patterns": ["\\d+"],
+    "expected_no_crash_bleed": false,
+    "assertions": { "response_not_empty": true, "no_error": true, "contains_number": true }
+  }
+]

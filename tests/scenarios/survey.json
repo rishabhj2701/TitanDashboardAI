@@ -1,0 +1,102 @@
+[
+  {
+    "id": "survey_001",
+    "question": "How many survey responses total?",
+    "domain": "survey",
+    "expected_analysis_type": "summary",
+    "expected_key_columns": ["count"],
+    "expected_narrative_patterns": ["\\d+"],
+    "expected_no_crash_bleed": true,
+    "assertions": { "response_not_empty": true, "no_error": true, "contains_number": true, "no_crash_language": true }
+  },
+  {
+    "id": "survey_002",
+    "question": "What is the average satisfaction rating?",
+    "domain": "survey",
+    "expected_analysis_type": "summary",
+    "expected_key_columns": ["rating"],
+    "expected_narrative_patterns": ["\\d+"],
+    "expected_no_crash_bleed": true,
+    "assertions": { "response_not_empty": true, "no_error": true, "contains_number": true, "no_crash_language": true }
+  },
+  {
+    "id": "survey_003",
+    "question": "Compare satisfaction score between male and female",
+    "domain": "survey",
+    "expected_analysis_type": "comparison",
+    "expected_key_columns": ["gender", "rating"],
+    "expected_narrative_patterns": ["\\d+"],
+    "expected_no_crash_bleed": true,
+    "assertions": { "response_not_empty": true, "no_error": true, "contains_number": true, "no_crash_language": true }
+  },
+  {
+    "id": "survey_004",
+    "question": "Distribution of responses by age group",
+    "domain": "survey",
+    "expected_analysis_type": "distribution",
+    "expected_key_columns": ["age_group", "count"],
+    "expected_narrative_patterns": ["[Tt]op|age|distribut"],
+    "expected_no_crash_bleed": true,
+    "assertions": { "response_not_empty": true, "no_error": true, "no_crash_language": true }
+  },
+  {
+    "id": "survey_005",
+    "question": "Show the trend of ratings over time",
+    "domain": "survey",
+    "expected_analysis_type": "trend",
+    "expected_key_columns": ["timestamp", "rating"],
+    "expected_narrative_patterns": ["[Tt]rend|increas|decreas"],
+    "expected_no_crash_bleed": true,
+    "assertions": { "response_not_empty": true, "no_error": true, "no_crash_language": true }
+  },
+  {
+    "id": "survey_006",
+    "question": "Show all responses on the map",
+    "domain": "survey",
+    "expected_analysis_type": "map_only",
+    "expected_key_columns": [],
+    "expected_narrative_patterns": ["map|display"],
+    "expected_no_crash_bleed": true,
+    "assertions": { "response_not_empty": true, "no_error": true, "no_crash_language": true }
+  },
+  {
+    "id": "survey_007",
+    "question": "List the 10 lowest rated responses",
+    "domain": "survey",
+    "expected_analysis_type": "raw_table",
+    "expected_key_columns": ["rating"],
+    "expected_narrative_patterns": ["\\d+"],
+    "expected_no_crash_bleed": true,
+    "assertions": { "response_not_empty": true, "no_error": true, "no_crash_language": true }
+  },
+  {
+    "id": "survey_008",
+    "question": "How many responses per question?",
+    "domain": "survey",
+    "expected_analysis_type": "distribution",
+    "expected_key_columns": ["question_id", "count"],
+    "expected_narrative_patterns": ["\\d+"],
+    "expected_no_crash_bleed": true,
+    "assertions": { "response_not_empty": true, "no_error": true, "contains_number": true, "no_crash_language": true }
+  },
+  {
+    "id": "survey_009",
+    "question": "Summarize the survey data",
+    "domain": "survey",
+    "expected_analysis_type": "summary",
+    "expected_key_columns": [],
+    "expected_narrative_patterns": ["\\d+"],
+    "expected_no_crash_bleed": true,
+    "assertions": { "response_not_empty": true, "no_error": true, "no_crash_language": true }
+  },
+  {
+    "id": "survey_010",
+    "question": "What gender has the highest average rating?",
+    "domain": "survey",
+    "expected_analysis_type": "comparison",
+    "expected_key_columns": ["gender", "rating"],
+    "expected_narrative_patterns": ["\\d+"],
+    "expected_no_crash_bleed": true,
+    "assertions": { "response_not_empty": true, "no_error": true, "contains_number": true, "no_crash_language": true }
+  }
+]

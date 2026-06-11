@@ -1,0 +1,203 @@
+.dq-panel {
+  color: var(--text-primary);
+}
+
+.dq-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.dq-header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.dq-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--teal);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.dq-refresh-btn {
+  background: var(--surface-light);
+  border: 1px solid var(--border-teal);
+  color: var(--text-bright);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 5px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.dq-refresh-btn:hover:not(:disabled) {
+  background: rgba(15, 32, 58, 0.95);
+}
+
+.dq-refresh-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.dq-score-section {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+  padding: 12px;
+  background: rgba(100, 255, 218, 0.05);
+  border-radius: 10px;
+  border: 1px solid rgba(100, 255, 218, 0.1);
+}
+
+.dq-score-ring {
+  flex-shrink: 0;
+}
+
+.dq-score-ring-bg {
+  fill: none;
+  stroke: rgba(100, 255, 218, 0.1);
+  stroke-width: 6;
+}
+
+.dq-score-ring-fill {
+  fill: none;
+  stroke: var(--teal);
+  stroke-width: 6;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.6s ease;
+}
+
+.dq-score-text {
+  fill: var(--teal);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.dq-score-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dq-score-label {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.dq-score-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.dq-score-rows {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.dq-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.dq-table th {
+  text-align: left;
+  font-size: 9px;
+  font-weight: 700;
+  color: rgba(100, 255, 218, 0.7);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 6px 8px;
+  border-bottom: 1px solid rgba(100, 255, 218, 0.15);
+}
+
+.dq-table th:last-child {
+  text-align: right;
+}
+
+.dq-table td {
+  padding: 6px 8px;
+  font-size: 11px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.dq-table td:last-child {
+  text-align: right;
+}
+
+.dq-field-name {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.dq-bar {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 3px;
+  overflow: hidden;
+  min-width: 80px;
+}
+
+.dq-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+
+.dq-bar-fill.high {
+  background: linear-gradient(90deg, #64ffda, #00bcd4);
+}
+
+.dq-bar-fill.medium {
+  background: linear-gradient(90deg, #ffb74d, #ffa726);
+}
+
+.dq-bar-fill.low {
+  background: linear-gradient(90deg, #ef9a9a, #e57373);
+}
+
+.dq-pct {
+  color: rgba(255, 255, 255, 0.7);
+  font-variant-numeric: tabular-nums;
+  font-size: 11px;
+  min-width: 42px;
+  text-align: right;
+}
+
+.dq-null-count {
+  color: rgba(255, 255, 255, 0.35);
+  font-variant-numeric: tabular-nums;
+}
+
+.dq-loading {
+  text-align: center;
+  padding: 40px 20px;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 13px;
+}
+
+.dq-error {
+  text-align: center;
+  padding: 20px;
+  color: #ffa4a4;
+  font-size: 12px;
+  background: rgba(255, 82, 82, 0.08);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 82, 82, 0.2);
+}
+
+.dq-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 13px;
+}

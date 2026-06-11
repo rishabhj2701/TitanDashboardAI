@@ -1,0 +1,157 @@
+[
+  {
+    "id": "crash_001",
+    "question": "How many crashes total?",
+    "domain": "crash",
+    "expected_analysis_type": "summary",
+    "expected_key_columns": ["count"],
+    "expected_narrative_patterns": ["\\d+"],
+    "expected_no_crash_bleed": false,
+    "assertions": { "response_not_empty": true, "no_error": true, "contains_number": true },
+    "style_checks": { "no_tool_talk": true, "max_words": 150 }
+  },
+  {
+    "id": "crash_002",
+    "question": "Show me the crash trend by month",
+    "domain": "crash",
+    "expected_analysis_type": "trend",
+    "expected_key_columns": ["accident_month", "count"],
+    "expected_narrative_patterns": ["[Tt]rend|month|increas|decreas"],
+    "expected_no_crash_bleed": false,
+    "assertions": { "response_not_empty": true, "no_error": true, "contains_number": true }
+  },
+  {
+    "id": "crash_003",
+    "question": "How do crashes break down by weather condition?",
+    "domain": "crash",
+    "expected_analysis_type": "distribution",
+    "expected_key_columns": ["weather_cond_1", "count"],
+    "expected_narrative_patterns": ["[Tt]op|weather|distribut"],
+    "expected_no_crash_bleed": false,
+    "assertions": { "response_not_empty": true, "no_error": true, "contains_number": true },
+    "style_checks": { "no_tool_talk": true, "max_words": 250 }
+  },
+  {
+    "id": "crash_004",
+    "question": "Compare crash counts on I-70 vs I-44",
+    "domain": "crash",
+    "expected_analysis_type": "comparison",
+    "expected_key_columns": ["road", "count"],
+    "expected_narrative_patterns": ["\\d+"],
+    "expected_no_crash_bleed": false,
+    "assertions": { "response_not_empty": true, "no_error": true, "contains_number": true }
+  },
+  {
+    "id": "crash_005",
+    "question": "Show all crashes on the map",
+    "domain": "crash",
+    "expected_analysis_type": "map_only",
+    "expected_key_columns": [],
+    "expected_narrative_patterns": ["map|display"],
+    "expected_no_crash_bleed": false,
+    "assertions": { "response_not_empty": true, "no_error": true, "has_map": true },
+    "style_checks": { "no_tool_talk": true }
+  },
+  {
+    "id": "crash_006",
+    "question": "List the 10 most recent crashes",
+    "domain": "crash",
+    "expected_analysis_type": "raw_table",
+    "expected_key_columns": [],
+    "expected_narrative_patterns": ["\\d+.*record|show"],
+    "expected_no_crash_bleed": false,
+    "assertions": { "response_not_empty": true, "no_error": true }
+  },
+  {
+    "id": "crash_007",
+    "question": "What is the average severity of crashes?",
+    "domain": "crash",
+    "expected_analysis_type": "summary",
+    "expected_key_columns": ["severity"],
+    "expected_narrative_patterns": ["\\d"],
+    "expected_no_crash_bleed": false,
+    "assertions": { "response_not_empty": true, "no_error": true }
+  },
+  {
+    "id": "crash_008",
+    "question": "Distribution of crashes by light condition",
+    "domain": "crash",
+    "expected_analysis_type": "distribution",
+    "expected_key_columns": ["light_cond", "count"],
+    "expected_narrative_patterns": ["[Tt]op|light|distribut"],
+    "expected_no_crash_bleed": false,
+    "assertions": { "response_not_empty": true, "no_error": true, "contains_number": true }
+  },
+  {
+    "id": "crash_009",
+    "question": "How many fatal crashes occurred?",
+    "domain": "crash",
+    "expected_analysis_type": "summary",
+    "expected_key_columns": ["count"],
+    "expected_narrative_patterns": ["\\d+"],
+    "expected_no_crash_bleed": false,
+    "assertions": { "response_not_empty": true, "no_error": true, "contains_number": true },
+    "style_checks": { "no_tool_talk": true, "max_words": 150 }
+  },
+  {
+    "id": "crash_010",
+    "question": "Show crashes by road condition",
+    "domain": "crash",
+    "expected_analysis_type": "distribution",
+    "expected_key_columns": ["road_condition_1", "count"],
+    "expected_narrative_patterns": ["[Tt]op|road|distribut"],
+    "expected_no_crash_bleed": false,
+    "assertions": { "response_not_empty": true, "no_error": true, "has_map": true }
+  },
+  {
+    "id": "crash_011",
+    "question": "What are the top 5 accident types?",
+    "domain": "crash",
+    "expected_analysis_type": "distribution",
+    "expected_key_columns": ["accident_type", "count"],
+    "expected_narrative_patterns": ["[Tt]op|\\d+"],
+    "expected_no_crash_bleed": false,
+    "assertions": { "response_not_empty": true, "no_error": true, "contains_number": true },
+    "style_checks": { "no_tool_talk": true, "max_words": 250 }
+  },
+  {
+    "id": "crash_012",
+    "question": "Show me crashes on I-70",
+    "domain": "crash",
+    "expected_analysis_type": "map_only",
+    "expected_key_columns": [],
+    "expected_narrative_patterns": ["map|I.?70|display"],
+    "expected_no_crash_bleed": false,
+    "assertions": { "response_not_empty": true, "no_error": true, "has_map": true }
+  },
+  {
+    "id": "crash_013",
+    "question": "How many crashes happened in rainy weather?",
+    "domain": "crash",
+    "expected_analysis_type": "summary",
+    "expected_key_columns": ["count"],
+    "expected_narrative_patterns": ["\\d+"],
+    "expected_no_crash_bleed": false,
+    "assertions": { "response_not_empty": true, "no_error": true, "contains_number": true }
+  },
+  {
+    "id": "crash_014",
+    "question": "Compare crashes in urban vs rural areas",
+    "domain": "crash",
+    "expected_analysis_type": "comparison",
+    "expected_key_columns": ["urban_rural", "count"],
+    "expected_narrative_patterns": ["\\d+"],
+    "expected_no_crash_bleed": false,
+    "assertions": { "response_not_empty": true, "no_error": true, "contains_number": true }
+  },
+  {
+    "id": "crash_015",
+    "question": "What day of the week has the most crashes?",
+    "domain": "crash",
+    "expected_analysis_type": "distribution",
+    "expected_key_columns": ["count"],
+    "expected_narrative_patterns": ["[Tt]op|\\d+"],
+    "expected_no_crash_bleed": false,
+    "assertions": { "response_not_empty": true, "no_error": true, "contains_number": true }
+  }
+]

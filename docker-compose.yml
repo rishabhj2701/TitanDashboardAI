@@ -1,0 +1,161 @@
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: traffic_redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  postgis:
+    image: postgis/postgis:16-3.4
+    container_name: postgis
+    profiles: ["localdb"]
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: traffic
+    volumes:
+      - postgis_data:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d traffic"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  app_api:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: traffic_app_api
+    restart: unless-stopped
+    init: true
+    stop_grace_period: 25s
+    command: uvicorn server:app --host 0.0.0.0 --port 8000 --workers ${APP_API_WORKERS:-3}
+    environment:
+      POSTGIS_DSN: ${POSTGIS_DSN:?POSTGIS_DSN must point to your VM PostGIS target}
+      APP_DATA_SCHEMA: ${APP_DATA_SCHEMA:-app_data}
+      CRASH_TIMEZONE: ${CRASH_TIMEZONE:-America/Chicago}
+      CLEAR_POSTGIS_ON_STARTUP: ${CLEAR_POSTGIS_ON_STARTUP:-0}
+      CLEAR_POSTGIS_ON_SHUTDOWN: ${CLEAR_POSTGIS_ON_SHUTDOWN:-0}
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
+      APP_ENV: ${APP_ENV:-development}
+      REQUIRE_USER_ID: ${REQUIRE_USER_ID:-1}
+      ALLOW_DEBUG_USER_HEADER: ${ALLOW_DEBUG_USER_HEADER:-0}
+      CORS_ALLOW_ORIGINS: ${CORS_ALLOW_ORIGINS:-*}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+      ADK_SESSION_PREFIX: ${ADK_SESSION_PREFIX:-ta:adk}
+      ADK_SESSION_TTL_SECONDS: ${ADK_SESSION_TTL_SECONDS:-1209600}
+      ADK_SESSION_MAX_EVENTS: ${ADK_SESSION_MAX_EVENTS:-300}
+      ADK_MAX_SESSIONS_PER_USER: ${ADK_MAX_SESSIONS_PER_USER:-30}
+      STATE_MAP_TTL_SECONDS: ${STATE_MAP_TTL_SECONDS:-1800}
+      STATE_EXEC_TTL_SECONDS: ${STATE_EXEC_TTL_SECONDS:-1800}
+      STATE_CHAT_TTL_SECONDS: ${STATE_CHAT_TTL_SECONDS:-90}
+      JWT_SECRET: ${JWT_SECRET:-}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:-}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-}
+      OAUTH_REDIRECT_BASE: ${OAUTH_REDIRECT_BASE:-http://localhost:8080}
+      WORKZONE_ANALYSIS_STMT_TIMEOUT_MS: ${WORKZONE_ANALYSIS_STMT_TIMEOUT_MS:-90000}
+      WORKZONE_ANALYSIS_MAX_MAP_POINTS: ${WORKZONE_ANALYSIS_MAX_MAP_POINTS:-5000}
+      AREA_ANALYSIS_STMT_TIMEOUT_MS: ${AREA_ANALYSIS_STMT_TIMEOUT_MS:-120000}
+      AREA_ANALYSIS_AUTO_AGGREGATE_AREA_KM2: ${AREA_ANALYSIS_AUTO_AGGREGATE_AREA_KM2:-25}
+      AREA_ANALYSIS_DEFAULT_MAP_POINTS: ${AREA_ANALYSIS_DEFAULT_MAP_POINTS:-12000}
+      AREA_ANALYSIS_DEFAULT_HB_MAP_POINTS: ${AREA_ANALYSIS_DEFAULT_HB_MAP_POINTS:-5000}
+      AREA_ANALYSIS_DEFAULT_MAX_ROADS: ${AREA_ANALYSIS_DEFAULT_MAX_ROADS:-8000}
+      AREA_ANALYSIS_DEFAULT_MIN_ROAD_POINTS: ${AREA_ANALYSIS_DEFAULT_MIN_ROAD_POINTS:-20}
+      AREA_ANALYSIS_FAST_APPROX_ENABLED: ${AREA_ANALYSIS_FAST_APPROX_ENABLED:-1}
+      AREA_ANALYSIS_FAST_APPROX_AREA_KM2: ${AREA_ANALYSIS_FAST_APPROX_AREA_KM2:-0}
+      AREA_ANALYSIS_FAST_OVERLAP_SIMPLIFY_TOLERANCE_M: ${AREA_ANALYSIS_FAST_OVERLAP_SIMPLIFY_TOLERANCE_M:-20}
+      AREA_ANALYSIS_FAST_OVERLAP_SIMPLIFY_MIN_AREA_KM2: ${AREA_ANALYSIS_FAST_OVERLAP_SIMPLIFY_MIN_AREA_KM2:-200}
+      AREA_ANALYSIS_FAST_AGGREGATE_HB_MAP_POINTS: ${AREA_ANALYSIS_FAST_AGGREGATE_HB_MAP_POINTS:-4000}
+      AREA_ANALYSIS_AGGREGATE_CRASH_MAP_POINTS: ${AREA_ANALYSIS_AGGREGATE_CRASH_MAP_POINTS:-2000}
+      AREA_ANALYSIS_AGGREGATE_HB_MAP_POINTS: ${AREA_ANALYSIS_AGGREGATE_HB_MAP_POINTS:-4000}
+      AREA_ANALYSIS_CACHE_TTL_S: ${AREA_ANALYSIS_CACHE_TTL_S:-300}
+      AREA_ANALYSIS_CACHE_MAX_ENTRIES: ${AREA_ANALYSIS_CACHE_MAX_ENTRIES:-128}
+      REQUEST_TIMING_LOG_ENABLED: ${REQUEST_TIMING_LOG_ENABLED:-1}
+      REQUEST_TIMING_SLOW_MS: ${APP_REQUEST_TIMING_SLOW_MS:-1000}
+      REQUEST_TIMING_INCLUDE_QUERY: ${REQUEST_TIMING_INCLUDE_QUERY:-0}
+      REQUEST_TIMING_ADD_HEADER: ${REQUEST_TIMING_ADD_HEADER:-0}
+      REQUEST_TIMING_LOG_HEALTH: ${REQUEST_TIMING_LOG_HEALTH:-0}
+      AGENT_SKILLS_ENABLED: ${AGENT_SKILLS_ENABLED:-0}
+      AGENT_SKILLS_MAX_ATTEMPTS_PER_TURN: ${AGENT_SKILLS_MAX_ATTEMPTS_PER_TURN:-1}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./uploads:/app/uploads
+      - ./graphs:/app/graphs
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8000/api/capabilities >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  tile_api:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: traffic_tile_api
+    restart: unless-stopped
+    init: true
+    stop_grace_period: 25s
+    command: uvicorn tile_server:app --host 0.0.0.0 --port 8001 --workers ${TILE_API_WORKERS:-2}
+    environment:
+      POSTGIS_DSN: ${POSTGIS_DSN:?POSTGIS_DSN must point to your VM PostGIS target}
+      DEFAULT_CV_DATASET: ${DEFAULT_CV_DATASET:-}
+      POSTGIS_POOL_MIN_CONN: ${TILE_POSTGIS_POOL_MIN_CONN:-2}
+      POSTGIS_POOL_MAX_CONN: ${TILE_POSTGIS_POOL_MAX_CONN:-40}
+      REQUEST_TIMING_LOG_ENABLED: ${TILE_REQUEST_TIMING_LOG_ENABLED:-1}
+      REQUEST_TIMING_SLOW_MS: ${TILE_REQUEST_TIMING_SLOW_MS:-1500}
+      REQUEST_TIMING_INCLUDE_QUERY: ${REQUEST_TIMING_INCLUDE_QUERY:-0}
+      REQUEST_TIMING_ADD_HEADER: ${REQUEST_TIMING_ADD_HEADER:-0}
+      REQUEST_TIMING_LOG_HEALTH: ${REQUEST_TIMING_LOG_HEALTH:-0}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "8001:8001"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8001/healthz >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    container_name: traffic_web
+    restart: unless-stopped
+    stop_grace_period: 25s
+    depends_on:
+      app_api:
+        condition: service_healthy
+      tile_api:
+        condition: service_healthy
+    ports:
+      - "8080:80"
+    volumes:
+      - nginx_cache:/var/cache/nginx
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O- http://127.0.0.1/healthz >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+volumes:
+  postgis_data:
+  nginx_cache:

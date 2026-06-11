@@ -1,0 +1,398 @@
+[
+  {
+    "id": "deep_traffic_i70_only",
+    "tier": "deep",
+    "complexity": "simple",
+    "domain": "traffic",
+    "turns": [
+      {
+        "user": "Show just I-70 traffic data",
+        "assertions": {
+          "response_not_empty": true,
+          "no_error": true,
+          "has_map": true,
+          "no_timeout_text": true
+        },
+        "expected_patterns": ["i[- ]?70|traffic|map|road"],
+        "forbidden_patterns": ["statement timeout|Error executing agent|Traceback"]
+      }
+    ],
+    "final_assertions": {
+      "has_map": true
+    }
+  },
+  {
+    "id": "deep_traffic_i44_only",
+    "tier": "deep",
+    "complexity": "simple",
+    "domain": "traffic",
+    "turns": [
+      {
+        "user": "Show just I-44 traffic data",
+        "assertions": {
+          "response_not_empty": true,
+          "no_error": true,
+          "has_map": true,
+          "no_timeout_text": true
+        },
+        "expected_patterns": ["i[- ]?44|traffic|map|road"],
+        "forbidden_patterns": ["statement timeout|Error executing agent|Traceback"]
+      }
+    ],
+    "final_assertions": {
+      "has_map": true
+    }
+  },
+  {
+    "id": "deep_chain_i70_then_traffic",
+    "tier": "deep",
+    "complexity": "in_depth",
+    "domain": "traffic",
+    "turns": [
+      {
+        "user": "Show just I-70 data",
+        "assertions": {
+          "response_not_empty": true,
+          "no_error": true,
+          "no_timeout_text": true
+        },
+        "expected_patterns": ["i[- ]?70|traffic|road|clarify"],
+        "forbidden_patterns": ["statement timeout|Error executing agent|Traceback"]
+      },
+      {
+        "user": "traffic",
+        "assertions": {
+          "response_not_empty": true,
+          "no_error": true,
+          "has_map": true,
+          "no_timeout_text": true
+        },
+        "expected_patterns": ["traffic|map|road"],
+        "forbidden_patterns": ["statement timeout|Error executing agent|Traceback"]
+      }
+    ],
+    "final_assertions": {
+      "has_map": true
+    }
+  },
+  {
+    "id": "deep_chain_i70_to_i44",
+    "tier": "deep",
+    "complexity": "in_depth",
+    "domain": "traffic",
+    "turns": [
+      {
+        "user": "Show I-70",
+        "assertions": {
+          "response_not_empty": true,
+          "no_error": true,
+          "no_timeout_text": true
+        },
+        "expected_patterns": ["i[- ]?70|traffic|road|clarify"],
+        "forbidden_patterns": ["statement timeout|Error executing agent|Traceback"]
+      },
+      {
+        "user": "traffic",
+        "assertions": {
+          "response_not_empty": true,
+          "no_error": true,
+          "has_map": true,
+          "no_timeout_text": true
+        },
+        "expected_patterns": ["traffic|map|road"],
+        "forbidden_patterns": ["statement timeout|Error executing agent|Traceback"]
+      },
+      {
+        "user": "Now show I-44",
+        "assertions": {
+          "response_not_empty": true,
+          "no_error": true,
+          "has_map": true,
+          "no_timeout_text": true
+        },
+        "expected_patterns": ["i[- ]?44|traffic|map|road"],
+        "forbidden_patterns": ["statement timeout|Error executing agent|Traceback"]
+      }
+    ],
+    "final_assertions": {
+      "has_map": true
+    }
+  },
+  {
+    "id": "deep_crash_i70",
+    "tier": "deep",
+    "complexity": "simple",
+    "domain": "crash",
+    "turns": [
+      {
+        "user": "Show crashes on I-70",
+        "assertions": {
+          "response_not_empty": true,
+          "no_error": true,
+          "has_map": true,
+          "no_timeout_text": true
+        },
+        "expected_patterns": ["crash|i[- ]?70|map"],
+        "forbidden_patterns": ["statement timeout|Error executing agent|Traceback"]
+      }
+    ],
+    "final_assertions": {
+      "has_map": true
+    }
+  },
+  {
+    "id": "deep_workzone_i44",
+    "tier": "deep",
+    "complexity": "simple",
+    "domain": "workzone",
+    "turns": [
+      {
+        "user": "Show workzones on I-44",
+        "assertions": {
+          "response_not_empty": true,
+          "no_error": true,
+          "has_map": true,
+          "no_timeout_text": true
+        },
+        "expected_patterns": ["workzone|i[- ]?44|map"],
+        "forbidden_patterns": ["statement timeout|Error executing agent|Traceback"]
+      }
+    ],
+    "final_assertions": {
+      "has_map": true
+    }
+  },
+  {
+    "id": "deep_compare_crash_i70_i44",
+    "tier": "deep",
+    "complexity": "simple",
+    "domain": "crash",
+    "turns": [
+      {
+        "user": "Compare crash counts on I-70 vs I-44",
+        "assertions": {
+          "response_not_empty": true,
+          "no_error": true,
+          "contains_number": true,
+          "no_timeout_text": true
+        },
+        "expected_patterns": ["compare|crash|i[- ]?70|i[- ]?44|count"],
+        "forbidden_patterns": ["statement timeout|Error executing agent|Traceback"]
+      }
+    ],
+    "final_assertions": {}
+  },
+  {
+    "id": "deep_traffic_active_run_i70",
+    "tier": "deep",
+    "complexity": "simple",
+    "domain": "traffic",
+    "turns": [
+      {
+        "user": "Show active traffic data on I-70",
+        "assertions": {
+          "response_not_empty": true,
+          "no_error": true,
+          "has_map": true,
+          "no_timeout_text": true
+        },
+        "expected_patterns": ["active|traffic|i[- ]?70|map|road"],
+        "forbidden_patterns": ["statement timeout|Error executing agent|Traceback"]
+      }
+    ],
+    "final_assertions": {
+      "has_map": true
+    }
+  },
+  {
+    "id": "deep_traffic_i70_july9_2025",
+    "tier": "deep",
+    "complexity": "simple",
+    "domain": "traffic",
+    "turns": [
+      {
+        "user": "Show I-70 traffic for July 9, 2025",
+        "assertions": {
+          "response_not_empty": true,
+          "no_error": true,
+          "no_timeout_text": true
+        },
+        "expected_patterns": ["i[- ]?70|july|2025|traffic|map|road"],
+        "forbidden_patterns": ["statement timeout|Error executing agent|Traceback"]
+      }
+    ],
+    "final_assertions": {}
+  },
+  {
+    "id": "deep_ambiguous_requires_domain_clarification",
+    "tier": "deep",
+    "complexity": "simple",
+    "domain": "mixed",
+    "turns": [
+      {
+        "user": "Show incidents on I-70",
+        "assertions": {
+          "response_not_empty": true,
+          "no_error": true,
+          "has_clarification": true,
+          "no_timeout_text": true
+        },
+        "expected_patterns": ["traffic|crash|workzone|clarify|which"],
+        "forbidden_patterns": ["statement timeout|Error executing agent|Traceback"]
+      }
+    ],
+    "final_assertions": {
+      "has_clarification": true
+    }
+  },
+  {
+    "id": "deep_chain_active_run_then_i44",
+    "tier": "deep",
+    "complexity": "in_depth",
+    "domain": "traffic",
+    "turns": [
+      {
+        "user": "Use the active run and show I-70 traffic only",
+        "assertions": {
+          "response_not_empty": true,
+          "no_error": true,
+          "has_map": true,
+          "no_timeout_text": true
+        },
+        "expected_patterns": ["active|run|i[- ]?70|traffic|map"],
+        "forbidden_patterns": ["statement timeout|Error executing agent|Traceback"]
+      },
+      {
+        "user": "Now switch that to I-44",
+        "assertions": {
+          "response_not_empty": true,
+          "no_error": true,
+          "has_map": true,
+          "no_timeout_text": true
+        },
+        "expected_patterns": ["i[- ]?44|traffic|map|road"],
+        "forbidden_patterns": ["statement timeout|Error executing agent|Traceback"]
+      }
+    ],
+    "final_assertions": {
+      "has_map": true
+    }
+  },
+  {
+    "id": "deep_chain_traffic_then_severity_focus",
+    "tier": "deep",
+    "complexity": "in_depth",
+    "domain": "traffic",
+    "turns": [
+      {
+        "user": "Show I-70 traffic data",
+        "assertions": {
+          "response_not_empty": true,
+          "no_error": true,
+          "has_map": true,
+          "no_timeout_text": true
+        },
+        "expected_patterns": ["i[- ]?70|traffic|map"],
+        "forbidden_patterns": ["statement timeout|Error executing agent|Traceback"]
+      },
+      {
+        "user": "Keep the same scope but show only severe congestion",
+        "assertions": {
+          "response_not_empty": true,
+          "no_error": true,
+          "no_timeout_text": true
+        },
+        "expected_patterns": ["severe|congestion|traffic|i[- ]?70|map"],
+        "forbidden_patterns": ["statement timeout|Error executing agent|Traceback"]
+      }
+    ],
+    "final_assertions": {}
+  },
+  {
+    "id": "deep_chain_crash_then_workzone_same_corridor",
+    "tier": "deep",
+    "complexity": "in_depth",
+    "domain": "mixed",
+    "turns": [
+      {
+        "user": "Show crashes on I-70",
+        "assertions": {
+          "response_not_empty": true,
+          "no_error": true,
+          "has_map": true,
+          "no_timeout_text": true
+        },
+        "expected_patterns": ["crash|i[- ]?70|map"],
+        "forbidden_patterns": ["statement timeout|Error executing agent|Traceback"]
+      },
+      {
+        "user": "Now show workzones on the same corridor",
+        "assertions": {
+          "response_not_empty": true,
+          "no_error": true,
+          "has_map": true,
+          "no_timeout_text": true
+        },
+        "expected_patterns": ["workzone|i[- ]?70|map|corridor"],
+        "forbidden_patterns": ["statement timeout|Error executing agent|Traceback"]
+      }
+    ],
+    "final_assertions": {
+      "has_map": true
+    }
+  },
+  {
+    "id": "deep_expected_clarification_for_broad_date",
+    "tier": "deep",
+    "complexity": "simple",
+    "domain": "mixed",
+    "turns": [
+      {
+        "user": "Show data for 2025",
+        "assertions": {
+          "response_not_empty": true,
+          "no_error": true,
+          "has_clarification": true,
+          "no_timeout_text": true
+        },
+        "expected_patterns": ["which|clarify|traffic|crash|workzone|dataset"],
+        "forbidden_patterns": ["statement timeout|Error executing agent|Traceback"]
+      }
+    ],
+    "final_assertions": {
+      "has_clarification": true
+    }
+  },
+  {
+    "id": "deep_chain_followup_date_refinement",
+    "tier": "deep",
+    "complexity": "in_depth",
+    "domain": "crash",
+    "turns": [
+      {
+        "user": "Show all crashes on July 9",
+        "assertions": {
+          "response_not_empty": true,
+          "no_error": true,
+          "no_timeout_text": true
+        },
+        "expected_patterns": ["july|crash|map|count"],
+        "forbidden_patterns": ["statement timeout|Error executing agent|Traceback"]
+      },
+      {
+        "user": "Now only on I-70",
+        "assertions": {
+          "response_not_empty": true,
+          "no_error": true,
+          "has_map": true,
+          "no_timeout_text": true
+        },
+        "expected_patterns": ["i[- ]?70|crash|map"],
+        "forbidden_patterns": ["statement timeout|Error executing agent|Traceback"]
+      }
+    ],
+    "final_assertions": {
+      "has_map": true
+    }
+  }
+]

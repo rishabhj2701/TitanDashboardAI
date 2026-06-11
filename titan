@@ -1,0 +1,372 @@
+#!/usr/bin/env bash
+# Start or stop the full local Titan stack (PostGIS, API, tiles, web, Redis).
+# Usage:
+#   ./titan start   — build (if needed) and run in background
+#   ./titan stop    — stop containers and free ports (no API/map CPU use)
+#   ./titan status  — show whether services are running
+#   ./titan restart — stop then start
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "$0")" && pwd)"
+cd "$ROOT"
+
+COMPOSE=(docker compose --profile localdb)
+ENV_FILE="$ROOT/.env"
+ENV_EXAMPLE="$ROOT/.env.example"
+
+_red() { printf '\033[0;31m%s\033[0m\n' "$*"; }
+_green() { printf '\033[0;32m%s\033[0m\n' "$*"; }
+_yellow() { printf '\033[0;33m%s\033[0m\n' "$*"; }
+
+require_docker() {
+  if ! command -v docker >/dev/null 2>&1; then
+    _red "Docker is not installed or not on PATH."
+    exit 1
+  fi
+  if ! docker info >/dev/null 2>&1; then
+    _red "Docker daemon is not running. Start Docker Desktop, then retry."
+    exit 1
+  fi
+}
+
+ensure_env() {
+  if [[ -f "$ENV_FILE" ]]; then
+    return 0
+  fi
+  if [[ -f "$ENV_EXAMPLE" ]]; then
+    cp "$ENV_EXAMPLE" "$ENV_FILE"
+    _yellow "Created .env from .env.example — review secrets before sharing."
+    return 0
+  fi
+  _red "Missing .env and .env.example in $ROOT"
+  exit 1
+}
+
+cmd_start() {
+  require_docker
+  ensure_env
+  _green "Starting Titan (PostGIS + API + tile API + web + Redis)..."
+  "${COMPOSE[@]}" up -d --build
+  _green "Titan is up (background)."
+  echo "  Dashboard: http://localhost:8080"
+  echo "  API:       http://localhost:8000"
+  echo "  Tiles:     http://localhost:8001"
+  echo "  Postgres:  localhost:5433"
+  echo ""
+  echo "Stop with: $ROOT/titan stop"
+}
+
+cmd_stop() {
+  require_docker
+  _yellow "Stopping Titan containers..."
+  "${COMPOSE[@]}" down --remove-orphans
+  _green "Titan stopped — containers removed, ports released."
+  echo "Docker Desktop may still use some RAM/CPU while open."
+  echo "Quit Docker Desktop from the menu bar to free that entirely."
+}
+
+cmd_status() {
+  require_docker
+  if "${COMPOSE[@]}" ps --status running 2>/dev/null | grep -q .; then
+    _green "Titan services running:"
+    "${COMPOSE[@]}" ps
+  else
+    _yellow "Titan is not running (no containers up for this compose project)."
+    "${COMPOSE[@]}" ps -a 2>/dev/null || true
+  fi
+}
+
+cmd_restart() {
+  cmd_stop
+  echo ""
+  cmd_start
+}
+
+require_stack_running() {
+  if ! curl -fsS "http://127.0.0.1:8080/healthz" >/dev/null 2>&1; then
+    _red "Titan is not running. Start it first: $ROOT/titan start"
+    exit 1
+  fi
+}
+
+detect_lan_ip() {
+  local ip=""
+  for iface in en0 en1 bond0; do
+    ip="$(ipconfig getifaddr "$iface" 2>/dev/null || true)"
+    if [[ -n "$ip" ]]; then
+      echo "$ip"
+      return 0
+    fi
+  done
+  ip="$(hostname -I 2>/dev/null | awk '{print $1}' || true)"
+  echo "$ip"
+}
+
+dotenv_get() {
+  local key="$1" val=""
+  [[ -f "$ENV_FILE" ]] || return 0
+  val="$(grep -E "^${key}=" "$ENV_FILE" 2>/dev/null | tail -1 | cut -d= -f2- || true)"
+  val="${val%\"}"
+  val="${val#\"}"
+  val="${val%\'}"
+  val="${val#\'}"
+  echo "$val"
+}
+
+cloudflare_config() {
+  echo "$ROOT/deploy/cloudflare/config.yml"
+}
+
+stable_share_url() {
+  local url host cfg
+  url="$(dotenv_get TITAN_SHARE_URL)"
+  if [[ -n "$url" ]]; then
+    echo "$url"
+    return 0
+  fi
+  cfg="$(cloudflare_config)"
+  if [[ -f "$cfg" ]]; then
+    host="$(grep -E 'hostname:' "$cfg" 2>/dev/null | head -1 | sed -E 's/.*hostname:[[:space:]]*//' | tr -d \"\' || true)"
+    if [[ -n "$host" ]]; then
+      echo "https://${host}"
+    fi
+  fi
+}
+
+sanitize_subdomain() {
+  echo "$1" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9-]+/-/g; s/^-+|-+$//g' | cut -c1-63
+}
+
+parse_share_subdomain() {
+  local name=""
+  name="$(dotenv_get TITAN_TUNNEL_SUBDOMAIN)"
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --name|-n)
+        name="${2:-}"
+        shift 2
+        ;;
+      *) shift ;;
+    esac
+  done
+  name="$(sanitize_subdomain "$name")"
+  echo "$name"
+}
+
+stop_share_tunnel() {
+  local pid=""
+  if [[ -f "$ROOT/.share-tunnel.pid" ]]; then
+    pid="$(cat "$ROOT/.share-tunnel.pid" 2>/dev/null || true)"
+    if [[ -n "$pid" ]] && kill -0 "$pid" 2>/dev/null; then
+      kill "$pid" 2>/dev/null || true
+      _yellow "Stopped previous share tunnel (PID $pid)."
+    fi
+    rm -f "$ROOT/.share-tunnel.pid"
+  fi
+}
+
+finish_tunnel() {
+  local detach="$1" url="$2" pid="$3" log="$4"
+  echo "$url" >"$ROOT/.share-url"
+  echo "$pid" >"$ROOT/.share-tunnel.pid"
+
+  _green "Anyone on the internet can open:"
+  echo "  $url"
+  echo ""
+  echo "  Saved to: $ROOT/.share-url"
+  echo "  Tunnel PID: $pid (stop with: kill \$(cat $ROOT/.share-tunnel.pid))"
+  _yellow "Keep ./titan start running and leave this tunnel process alive."
+
+  if [[ "$detach" == "1" ]]; then
+    echo "  Tunnel running in background (log: $log)"
+    return 0
+  fi
+
+  _yellow "Press Ctrl+C to stop the tunnel (Titan keeps running)."
+  trap 'kill "$pid" 2>/dev/null; rm -f "$ROOT/.share-tunnel.pid"; exit 0' INT TERM
+  wait "$pid"
+}
+
+run_localtunnel_process() {
+  local detach="$1" sub="$2" log pid url i
+  if ! command -v npx >/dev/null 2>&1; then
+    _red "Node.js (npx) is required for --name tunnels. Install Node or use Cloudflare without --name."
+    exit 1
+  fi
+
+  log="$(mktemp -t titan-localtunnel.XXXXXX)"
+  _green "Starting localtunnel with subdomain: ${sub} ..."
+  _yellow "Cloudflare quick tunnels cannot pick a name — use --name for https://${sub}.loca.lt"
+  npx --yes localtunnel --port 8080 --local-host 127.0.0.1 --subdomain "$sub" >"$log" 2>&1 &
+  pid=$!
+
+  url=""
+  for i in $(seq 1 45); do
+    url="$(grep -oE 'https://[a-zA-Z0-9-]+\.(loca\.lt|localtunnel\.me)' "$log" 2>/dev/null | head -1 || true)"
+    if [[ -n "$url" ]]; then
+      break
+    fi
+    if ! kill -0 "$pid" 2>/dev/null; then
+      _red "localtunnel exited (subdomain may be taken — try another --name):"
+      tail -30 "$log" >&2 || true
+      rm -f "$log"
+      exit 1
+    fi
+    sleep 1
+  done
+
+  if [[ -z "$url" ]]; then
+    _red "Timed out waiting for localtunnel URL. Log: $log"
+    kill "$pid" 2>/dev/null || true
+    exit 1
+  fi
+
+  finish_tunnel "$detach" "$url" "$pid" "$log"
+}
+
+run_cloudflare_tunnel_process() {
+  local detach="$1" url="$2" log pid i
+  log="$(mktemp -t titan-cloudflared.XXXXXX)"
+
+  if [[ -f "$(cloudflare_config)" ]]; then
+    _green "Starting named Cloudflare tunnel (fixed URL) ..."
+    cloudflared tunnel --config "$(cloudflare_config)" run >"$log" 2>&1 &
+  else
+    _green "Starting Cloudflare quick tunnel (random name each run) ..."
+    _yellow "For a readable link: ./titan share anyone --name titan-reactor-lab"
+    cloudflared tunnel --url "http://127.0.0.1:8080" >"$log" 2>&1 &
+  fi
+  pid=$!
+
+  if [[ -z "$url" ]]; then
+    url=""
+    for i in $(seq 1 45); do
+      url="$(grep -oE 'https://[a-zA-Z0-9-]+\.trycloudflare\.com' "$log" 2>/dev/null | head -1 || true)"
+      if [[ -n "$url" ]]; then
+        break
+      fi
+      if ! kill -0 "$pid" 2>/dev/null; then
+        _red "cloudflared exited:"
+        tail -30 "$log" >&2 || true
+        rm -f "$log"
+        exit 1
+      fi
+      sleep 1
+    done
+    if [[ -z "$url" ]]; then
+      _red "Timed out waiting for tunnel URL. Log: $log"
+      kill "$pid" 2>/dev/null || true
+      exit 1
+    fi
+  fi
+
+  finish_tunnel "$detach" "$url" "$pid" "$log"
+}
+
+start_public_tunnel() {
+  local detach="${1:-0}" sub="${2:-}"
+  stop_share_tunnel
+
+  if [[ -n "$sub" ]] && [[ ! -f "$(cloudflare_config)" ]]; then
+    run_localtunnel_process "$detach" "$sub"
+    return 0
+  fi
+
+  if ! command -v cloudflared >/dev/null 2>&1; then
+    _red "cloudflared not found. Install: brew install cloudflared"
+    exit 1
+  fi
+  run_cloudflare_tunnel_process "$detach" "$(stable_share_url)"
+}
+
+cmd_share_setup() {
+  if ! command -v cloudflared >/dev/null 2>&1; then
+    _red "cloudflared not found. Install: brew install cloudflared"
+    exit 1
+  fi
+  bash "$ROOT/scripts/setup_cloudflare_tunnel.sh"
+}
+
+cmd_share() {
+  require_docker
+  require_stack_running
+
+  shift
+  local detach=0 a
+  for a in "$@"; do
+    [[ "$a" == "--detach" ]] && detach=1
+    [[ "$a" == "setup" ]] && cmd_share_setup && return 0
+  done
+  for a in "$@"; do
+    if [[ "$a" == "anyone" || "$a" == "--public" || "$a" == "public" ]]; then
+      start_public_tunnel "$detach" "$(parse_share_subdomain "$@")"
+      return 0
+    fi
+  done
+
+  local lan_ip
+  lan_ip="$(detect_lan_ip)"
+
+  _green "Share the Titan dashboard"
+  echo ""
+  echo "  Anyone on the internet:"
+  echo "    ./titan share anyone --name titan-reactor-lab   # readable URL (loca.lt)"
+  echo "    ./titan share anyone          # random trycloudflare.com URL"
+  echo "    ./titan share setup           # fixed URL on your domain"
+  if url="$(stable_share_url)"; [[ -n "$url" ]]; then
+    echo "    Stable URL configured: $url"
+  fi
+  echo ""
+  echo "  On this machine:  http://localhost:8080"
+  if [[ -n "$lan_ip" ]]; then
+    echo "  Same Wi‑Fi/LAN:   http://${lan_ip}:8080"
+    echo "                    (others must be on your network; allow port 8080 in the firewall if needed)"
+  else
+    _yellow "  Could not detect LAN IP — use System Settings → Network for your IP."
+  fi
+  echo ""
+  _yellow "Before sharing:"
+  echo "  • Set VITE_MAPBOX_TOKEN in .env, then ./titan restart (map needs a token in the build)"
+  echo "  • Lab mode has no login (AUTH_ENABLED=0) — anyone with the link can use the app"
+  echo "  • Your laptop must stay on with ./titan start running"
+  echo ""
+  echo "Stable team URL: deploy/aws/README.md"
+  echo "Full guide: $ROOT/docs/SHARING.md"
+}
+
+usage() {
+  cat <<EOF
+Titan local stack control
+
+  ./titan start    Start all services (detached, rebuild if needed)
+  ./titan stop     Stop all services and free ports
+  ./titan status   Show running containers
+  ./titan restart  Stop then start
+  ./titan share            LAN links + how to share publicly
+  ./titan share anyone [--name slug] [--detach]   Public HTTPS (name → loca.lt)
+  ./titan share setup      Fixed URL on your Cloudflare domain
+
+Aliases: up = start, down = stop
+
+From anywhere in this repo:
+  $(basename "$ROOT")/titan start
+EOF
+}
+
+main() {
+  case "${1:-}" in
+    start|up) cmd_start ;;
+    stop|down) cmd_stop ;;
+    status|ps) cmd_status ;;
+    restart) cmd_restart ;;
+    share) cmd_share "$@" ;;
+    -h|--help|help|"") usage ;;
+    *)
+      _red "Unknown command: $1"
+      usage
+      exit 1
+      ;;
+  esac
+}
+
+main "$@"

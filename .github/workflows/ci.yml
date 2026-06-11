@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npx tsc --noEmit -p tsconfig.app.json
+
+  backend-targeted:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install backend deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.docker.txt
+          pip install pytest
+      - name: Run targeted backend tests
+        env:
+          PYTHONPATH: .
+        run: |
+          pytest -q \
+            tests/test_auth_router.py \
+            tests/test_capabilities_router.py \
+            tests/test_roads_bbox_router.py \
+            tests/test_roads_tiles_router.py \
+            tests/test_db_pool.py \
+            tests/test_session_datasets_router.py \
+            tests/test_server_preflight.py \
+            tests/test_tile_server_preflight.py
+      - name: Dump route contracts
+        env:
+          PYTHONPATH: .
+        run: |
+          python scripts/dump_routes.py --module server --module tile_server > routes.after.txt
+      - name: Upload route contract artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: routes-after
+          path: routes.after.txt
+
+  lint-report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Run lint (non-blocking)
+        run: npm run lint || true
